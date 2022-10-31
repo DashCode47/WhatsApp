@@ -1,20 +1,13 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
 import Navigator from "./src/Navigation";
+import { Amplify } from "aws-amplify";
+import awsconfig from "./src/aws-exports";
+import { withAuthenticator } from "aws-amplify-react-native/dist/Auth";
 
-export default function App() {
-  const chat = {
-    id: "1",
-    user: {
-      image:
-        "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/lukas.jpeg",
-      name: "Lukas",
-    },
-    lastMessage: {
-      text: "oke",
-      createdAt: "07:30",
-    },
-  };
+Amplify.configure({ ...awsconfig, Analytics: { disabled: true } });
+
+function App() {
   return (
     <View style={styles.container}>
       <Navigator />
@@ -30,3 +23,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
+export default withAuthenticator(App);
