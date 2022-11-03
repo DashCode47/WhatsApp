@@ -3,17 +3,48 @@ import React from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useNavigation } from "@react-navigation/native";
+import { API, graphqlOperation, Auth } from "aws-amplify";
+import { createChatRoom, createUserChatRoom } from "../../graphql/mutations";
+import { getCommonChatRoom } from "../../components/Services/chatRoomService";
 dayjs.extend(relativeTime);
 
 const ContactList = ({ chat }) => {
   const navigation = useNavigation();
+
+  const onPress = async () => {
+    /* check if tehres already a chataroom */
+    const existingChatRoom = await getCommonChatRoom(chat.id);
+    if (existingChatRoom) {
+      navigation.navigate("Chat", { id: existingChatRoom.chatRoom.id });
+      return;
+    }
+    /*  const newChatRoomData = await API.graphql(
+      graphqlOperation(createChatRoom, { input: {} })
+    );
+    console.log(newChatRoomData);
+    if (!newChatRoomData.data?.createChatRoom) {
+      console.log("error");
+    }
+    const newChatRoom = newChatRoomData.data?.createChatRoom;
+    await API.graphql(
+      graphqlOperation(createUserChatRoom, {
+        input: { chatRoomID: newChatRoom.id, userID: chat.id },
+      })
+    );
+
+    const authUser = await Auth.currentAuthenticatedUser();
+    await API.graphql(
+      graphqlOperation(createUserChatRoom, {
+        input: {
+          chatRoomID: newChatRoom.id,
+          userID: authUser.attributes.sub,
+        },
+      })
+    );
+    navigation.navigate("Chat", { id: newChatRoom.id }); */
+  };
   return (
-    <Pressable
-      style={styles.container}
-      onPress={() =>
-        navigation.navigate("Chat", { id: chat.id, name: chat.name })
-      }
-    >
+    <Pressable style={styles.container} onPress={onPress}>
       <Image
         source={{
           uri: chat.image,
