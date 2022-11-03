@@ -6,20 +6,25 @@ import { listChatRooms } from "./queries";
 
 const ChatsScreen = () => {
   const [chatRoom, setChatRooms] = useState([]);
-  useEffect(() => {
-    const fetchChatRooms = async () => {
-      const authUser = await Auth.currentAuthenticatedUser();
-      const response = await API.graphql(
-        graphqlOperation(listChatRooms, { id: authUser.attributes.sub })
-      );
-      const rooms = response?.data?.getUser?.ChatRooms?.items || [];
-      const sortedItems = rooms.sort(
-        (r1, r2) =>
-          new Date(r2.chatRoom.updatedAt) - new Date(r1.chatRoom.updatedAt)
-      );
+  const [loading, setloading] = useState(false);
 
-      setChatRooms(sortedItems);
-    };
+  const fetchChatRooms = async () => {
+    setloading(true);
+    const authUser = await Auth.currentAuthenticatedUser();
+    const response = await API.graphql(
+      graphqlOperation(listChatRooms, { id: authUser.attributes.sub })
+    );
+    const rooms = response?.data?.getUser?.ChatRooms?.items || [];
+    const sortedItems = rooms.sort(
+      (r1, r2) =>
+        new Date(r2.chatRoom.updatedAt) - new Date(r1.chatRoom.updatedAt)
+    );
+
+    setChatRooms(sortedItems);
+    setloading(false);
+  };
+
+  useEffect(() => {
     fetchChatRooms();
   }, []);
 
@@ -28,6 +33,8 @@ const ChatsScreen = () => {
       data={chatRoom}
       renderItem={({ item }) => <ChatlistItem chat={item.chatRoom} />}
       style={{ backgroundColor: "white" }}
+      refreshing={loading}
+      onRefresh={fetchChatRooms}
     />
   );
 };
