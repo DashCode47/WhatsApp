@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useNavigation } from "@react-navigation/native";
 import { Auth, API, graphqlOperation } from "aws-amplify";
-import { onUpdateChatRoom } from "../../graphql/subscriptions ";
+import { onUpdateChatRoom } from "../../graphql/subscriptions";
 
 dayjs.extend(relativeTime);
 
