@@ -3,46 +3,18 @@ import React from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useNavigation } from "@react-navigation/native";
-import { API, graphqlOperation, Auth } from "aws-amplify";
-import { createChatRoom, createUserChatRoom } from "../../graphql/mutations";
-import { getCommonChatRoom } from "../../components/Services/chatRoomService";
+import { AntDesign, FontAwesome } from "@expo/vector-icons";
+
 dayjs.extend(relativeTime);
 
-const ContactList = ({ chat }) => {
+const ContactList = ({
+  chat,
+  onPress = () => {},
+  selectable = false,
+  isSelected = false,
+}) => {
   const navigation = useNavigation();
 
-  const onPress = async () => {
-    /* check if tehres already a chataroom */
-    const existingChatRoom = await getCommonChatRoom(chat.id);
-    if (existingChatRoom) {
-      navigation.navigate("Chat", { id: existingChatRoom.chatRoom.id });
-      return;
-    }
-    /*  const newChatRoomData = await API.graphql(
-      graphqlOperation(createChatRoom, { input: {} })
-    );
-    console.log(newChatRoomData);
-    if (!newChatRoomData.data?.createChatRoom) {
-      console.log("error");
-    }
-    const newChatRoom = newChatRoomData.data?.createChatRoom;
-    await API.graphql(
-      graphqlOperation(createUserChatRoom, {
-        input: { chatRoomID: newChatRoom.id, userID: chat.id },
-      })
-    );
-
-    const authUser = await Auth.currentAuthenticatedUser();
-    await API.graphql(
-      graphqlOperation(createUserChatRoom, {
-        input: {
-          chatRoomID: newChatRoom.id,
-          userID: authUser.attributes.sub,
-        },
-      })
-    );
-    navigation.navigate("Chat", { id: newChatRoom.id }); */
-  };
   return (
     <Pressable style={styles.container} onPress={onPress}>
       <Image
@@ -59,6 +31,12 @@ const ContactList = ({ chat }) => {
         </View>
         <Text numberOfLines={1}>{chat.status}</Text>
       </View>
+      {selectable &&
+        (isSelected ? (
+          <AntDesign name="checkcircle" size={24} color="royalblue" />
+        ) : (
+          <FontAwesome name="circle-thin" size={24} color="lightgray" />
+        ))}
     </Pressable>
   );
 };

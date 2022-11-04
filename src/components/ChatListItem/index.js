@@ -30,7 +30,7 @@ const index = ({ chat }) => {
       graphqlOperation(onUpdateChatRoom, { filter: { id: { eq: chat.id } } })
     ).subscribe({
       next: ({ value }) => {
-        setChatRoom((cr) => ({
+        setchatRoom((cr) => ({
           ...(cr || {}),
           ...value.data.onUpdateChatRoom,
         }));
