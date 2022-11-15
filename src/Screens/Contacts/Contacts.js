@@ -8,47 +8,50 @@ import { API, graphqlOperation, Auth } from "aws-amplify";
 import { createChatRoom, createUserChatRoom } from "../../graphql/mutations";
 import { getCommonChatRoom } from "../../components/Services/chatRoomService";
 
-const Contacts = () => {
+const ContactsScreen = () => {
   const [users, setUsers] = useState([]);
+
   const navigation = useNavigation();
+
   useEffect(() => {
     API.graphql(graphqlOperation(listUsers)).then((result) => {
       setUsers(result.data?.listUsers?.items);
     });
   }, []);
 
-  const createAChatRoomWithTheUser = async (chat) => {
-    /* check if tehres already a chataroom */
-    const existingChatRoom = await getCommonChatRoom(chat.id);
+  const createAChatRoomWithTheUser = async (user) => {
+    // Check if we already have a ChatRoom with user
+    const existingChatRoom = await getCommonChatRoomWithUser(user.id);
     if (existingChatRoom) {
       navigation.navigate("Chat", { id: existingChatRoom.chatRoom.id });
       return;
     }
-    /* CREATE A NEW CHATROOM */
+
+    // Create a new Chatroom
     const newChatRoomData = await API.graphql(
       graphqlOperation(createChatRoom, { input: {} })
     );
-
     if (!newChatRoomData.data?.createChatRoom) {
-      console.log("error");
+      console.log("Error creating the chat error");
     }
     const newChatRoom = newChatRoomData.data?.createChatRoom;
-    /* ADD USERS TO THE CREATED CHATROOM */
+
+    // Add the clicked user to the ChatRoom
     await API.graphql(
       graphqlOperation(createUserChatRoom, {
-        input: { chatRoomID: newChatRoom.id, userID: chat.id },
+        input: { chatRoomID: newChatRoom.id, userID: user.id },
       })
     );
-    /* ADD AUTHUSER TO CHATROOM */
+
+    // Add the auth user to the ChatRoom
     const authUser = await Auth.currentAuthenticatedUser();
     await API.graphql(
       graphqlOperation(createUserChatRoom, {
-        input: {
-          chatRoomID: newChatRoom.id,
-          userID: authUser.attributes.sub,
-        },
+        input: { chatRoomID: newChatRoom.id, userID: authUser.attributes.sub },
       })
     );
+
+    // navigate to the newly created ChatRoom
     navigation.navigate("Chat", { id: newChatRoom.id });
   };
 
@@ -56,14 +59,17 @@ const Contacts = () => {
     <FlatList
       data={users}
       renderItem={({ item }) => (
-        <ContactList
-          chat={item}
+        <ContactListItem
+          user={item}
           onPress={() => createAChatRoomWithTheUser(item)}
         />
       )}
+      style={{ backgroundColor: "white" }}
       ListHeaderComponent={() => (
         <Pressable
-          onPress={() => navigation.navigate("New Group")}
+          onPress={() => {
+            navigation.navigate("New Group");
+          }}
           style={{
             flexDirection: "row",
             alignItems: "center",
@@ -77,7 +83,7 @@ const Contacts = () => {
             color="royalblue"
             style={{
               marginRight: 20,
-              backgroundColor: "gainboro",
+              backgroundColor: "gainsboro",
               padding: 7,
               borderRadius: 20,
               overflow: "hidden",
@@ -90,6 +96,4 @@ const Contacts = () => {
   );
 };
 
-export default Contacts;
-
-const styles = StyleSheet.create({});
+export default ContactsScreen;

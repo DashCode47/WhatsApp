@@ -1,14 +1,15 @@
-import { StyleSheet, Text, View, Image, Pressable } from "react-native";
-import React from "react";
+import { Text, Image, StyleSheet, Pressable, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+
+import { AntDesign, FontAwesome } from "@expo/vector-icons";
+
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useNavigation } from "@react-navigation/native";
-import { AntDesign, FontAwesome } from "@expo/vector-icons";
 
 dayjs.extend(relativeTime);
 
-const ContactList = ({
-  chat,
+const ContactListItem = ({
+  user,
   onPress = () => {},
   selectable = false,
   isSelected = false,
@@ -16,20 +17,17 @@ const ContactList = ({
   const navigation = useNavigation();
 
   return (
-    <Pressable style={styles.container} onPress={onPress}>
-      <Image
-        source={{
-          uri: chat.image,
-        }}
-        style={styles.image}
-      />
+    <Pressable onPress={onPress} style={styles.container}>
+      <Image source={{ uri: user.image }} style={styles.image} />
+
       <View style={styles.content}>
-        <View style={styles.row}>
-          <Text style={styles.name} numberOfLines={1}>
-            {chat.name}
-          </Text>
-        </View>
-        <Text numberOfLines={1}>{chat.status}</Text>
+        <Text style={styles.name} numberOfLines={1}>
+          {user.name}
+        </Text>
+
+        <Text numberOfLines={2} style={styles.subTitle}>
+          {user.status}
+        </Text>
       </View>
       {selectable &&
         (isSelected ? (
@@ -41,30 +39,30 @@ const ContactList = ({
   );
 };
 
-export default ContactList;
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     marginHorizontal: 10,
     marginVertical: 5,
     height: 70,
+    alignItems: "center",
   },
-  image: { width: 60, height: 60, borderRadius: 30, marginRight: 10 },
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 10,
+  },
   content: {
     flex: 1,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "lightgray",
-  },
-  row: {
-    flexDirection: "row",
-    marginBottom: 5,
+    marginRight: 10,
   },
   name: {
-    flex: 1,
     fontWeight: "bold",
   },
-  subtitle: {
+  subTitle: {
     color: "gray",
   },
 });
+
+export default ContactListItem;

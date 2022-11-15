@@ -6,6 +6,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import MainTabNavigator from "./MainTabNavigator/MainTabNavigator";
 import NewGroupScreen from "../Screens/NewGroupScreen/NewGroupScreen";
+import GroupInfoScreen from "../Screens/GroupInfoScreen";
+import ContactsScreen from "../Screens/NewGroupScreen/NewGroupScreen";
 const Stack = createNativeStackNavigator();
 const Navigator = () => {
   return (
@@ -19,7 +21,8 @@ const Navigator = () => {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="Chat" component={ChatScreen} />
-        <Stack.Screen name="contacts" component={Contacts} />
+        <Stack.Screen name="Group info" component={GroupInfoScreen} />
+        <Stack.Screen name="contacts" component={ContactsScreen} />
         <Stack.Screen name="New Group" component={NewGroupScreen} />
       </Stack.Navigator>
     </NavigationContainer>

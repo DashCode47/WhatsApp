@@ -1,21 +1,15 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  Button,
-  TextInput,
-} from "react-native";
-import ContactList from "../../components/ContactListItems/ContactListItem";
 import React, { useState, useEffect } from "react";
+import { FlatList, View, TextInput, StyleSheet, Button } from "react-native";
+import ContactListItem from "../../components/ContactListItems/ContactListItem";
 import { API, graphqlOperation, Auth } from "aws-amplify";
 import { listUsers } from "../../graphql/queries";
 import { createChatRoom, createUserChatRoom } from "../../graphql/mutations";
+
 import { useNavigation } from "@react-navigation/native";
 
-const NewGroupScreen = () => {
+const ContactsScreen = () => {
   const [users, setUsers] = useState([]);
-  const [selectedUserID, setSelectedUserID] = useState([]);
+  const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [name, setName] = useState("");
 
   const navigation = useNavigation();
@@ -31,26 +25,27 @@ const NewGroupScreen = () => {
       headerRight: () => (
         <Button
           title="Create"
-          disabled={!name || selectedUserID.length < 1}
+          disabled={!name || selectedUserIds.length < 1}
           onPress={onCreateGroupPress}
         />
       ),
     });
-  }, [name, selectedUserID]);
+  }, [name, selectedUserIds]);
 
   const onCreateGroupPress = async () => {
-    /* CREATE A NEW CHATROOM */
+    // Create a new Chatroom
     const newChatRoomData = await API.graphql(
-      graphqlOperation(createChatRoom, { input: {} })
+      graphqlOperation(createChatRoom, { input: { name } })
     );
-
     if (!newChatRoomData.data?.createChatRoom) {
-      console.log("error");
+      console.log("Error creating the chat error");
     }
     const newChatRoom = newChatRoomData.data?.createChatRoom;
-    /* ADD USERS TO THE CREATED CHATROOM */
-    Promise.all(
-      selectedUserID.map((userID) =>
+
+    // Add the selected users to the ChatRoom
+
+    await Promise.all(
+      selectedUserIds.map((userID) =>
         API.graphql(
           graphqlOperation(createUserChatRoom, {
             input: { chatRoomID: newChatRoom.id, userID },
@@ -59,36 +54,36 @@ const NewGroupScreen = () => {
       )
     );
 
-    /* ADD AUTHUSER TO CHATROOM */
+    // Add the auth user to the ChatRoom
     const authUser = await Auth.currentAuthenticatedUser();
     await API.graphql(
       graphqlOperation(createUserChatRoom, {
-        input: {
-          chatRoomID: newChatRoom.id,
-          userID: authUser.attributes.sub,
-        },
+        input: { chatRoomID: newChatRoom.id, userID: authUser.attributes.sub },
       })
     );
-    setSelectedUserID([]);
+
+    setSelectedUserIds([]);
     setName("");
+    // navigate to the newly created ChatRoom
     navigation.navigate("Chat", { id: newChatRoom.id });
   };
 
   const onContactPress = (id) => {
-    setSelectedUserID((userIds) => {
+    setSelectedUserIds((userIds) => {
       if (userIds.includes(id)) {
-        //remove id from selected
+        // remove id from selected
         return [...userIds].filter((uid) => uid !== id);
       } else {
-        //add id to selected
+        // add id to selected
         return [...userIds, id];
       }
     });
   };
+
   return (
     <View style={styles.container}>
       <TextInput
-        placeholder="Group Name"
+        placeholder="Group name"
         value={name}
         onChangeText={setName}
         style={styles.input}
@@ -96,19 +91,17 @@ const NewGroupScreen = () => {
       <FlatList
         data={users}
         renderItem={({ item }) => (
-          <ContactList
-            chat={item}
+          <ContactListItem
+            user={item}
             selectable
             onPress={() => onContactPress(item.id)}
-            isSelected={selectedUserID.includes(item.id)}
+            isSelected={selectedUserIds.includes(item.id)}
           />
         )}
       />
     </View>
   );
 };
-
-export default NewGroupScreen;
 
 const styles = StyleSheet.create({
   container: { backgroundColor: "white" },
@@ -119,3 +112,5 @@ const styles = StyleSheet.create({
     margin: 10,
   },
 });
+
+export default ContactsScreen;
